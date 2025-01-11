@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Parent1Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,7 @@ use App\Http\Controllers\UserController;
 // });
 
 Route::resource('users', UserController::class);
+Route::resource('parents', Parent1Controller::class);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');

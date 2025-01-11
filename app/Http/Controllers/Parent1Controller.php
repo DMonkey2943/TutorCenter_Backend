@@ -1,0 +1,140 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Parent1;
+use Illuminate\Http\Request;
+
+class Parent1Controller extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $parents = Parent1::with('user')->latest('id')->get();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $parents,
+                'message' => 'Parents retrieved successfully'
+            ]
+        );
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $parent = new Parent1;
+        $parent->fill($request->all());
+
+        $parent->save();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $parent,
+                'message' => 'Tạo phụ huynh thành công'
+            ],
+            201
+        );
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $parent = Parent1::with('user')->find($id);
+
+        if (!$parent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent not found'
+            ], 404);
+        }
+
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $parent,
+                'message' => 'Parent retrieved successfully'
+            ]
+        );
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Parent1 $parent1)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $parent = Parent1::find($id);
+
+        if (!$parent) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Parent not found'
+                ],
+                404
+            );
+        }
+
+        if ($request->gender) {
+            $parent->gender = $request->gender;
+        }
+
+        $parent->save();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $parent,
+                'message' => 'Parent updated successfully'
+            ]
+        );
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        $parent = Parent1::find($id);
+
+        if (!$parent) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Parent not found'
+                ],
+                404
+            );
+        }
+
+        $parent->delete();
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'Parent deleted successfully'
+            ],
+            204
+        );
+    }
+}
