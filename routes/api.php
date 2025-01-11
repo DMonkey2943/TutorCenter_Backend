@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Parent1Controller;
+use App\Http\Controllers\TutorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,7 @@ use App\Http\Controllers\UserController;
 
 Route::resource('users', UserController::class);
 Route::resource('parents', Parent1Controller::class);
+Route::resource('tutors', TutorController::class);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
