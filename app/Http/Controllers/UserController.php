@@ -46,7 +46,7 @@ class UserController extends Controller
             [
                 'success' => true,
                 'data' => $user,
-                'message' => 'User created successfully'
+                'message' => 'Đăng ký tài khoản thành công'
             ],
             201
         );
