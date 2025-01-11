@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use App\Http\Requests\LoginRequest;
+use App\Models\Tutor;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,10 +13,12 @@ use Illuminate\Support\Facades\Log;
 class AuthController extends Controller
 {
     protected $userController;
+    protected $parent1Controller;
 
-    public function __construct(UserController $userController)
+    public function __construct(UserController $userController, Parent1Controller $parent1Controller)
     {
         $this->userController = $userController;
+        $this->parent1Controller = $parent1Controller;
     }
 
     /**
@@ -24,7 +27,23 @@ class AuthController extends Controller
     public function register(UserRequest $request)
     {
         try {
-            return $this->userController->store($request);
+            $response = $this->userController->store($request);
+            $user = $response->getData()->data;
+
+            if ($user->role === 'parent') {
+                $this->parent1Controller->store(new Request(
+                    [
+                        'user_id' => $user->id
+                    ]
+                ));
+            }
+            if ($user->role === 'tutor') {
+                // $tutor = Tutor::create([
+                //     'user_id' => $user->id
+                // ]);
+            }
+
+            return $response;
         } catch (Exception $e) {
             Log::error('Unable to Register user: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
             return response()->json([
