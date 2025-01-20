@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class Parent1Controller extends Controller
 {
+    protected $userController;
+
+    public function __construct(UserController $userController)
+    {
+        $this->userController = $userController;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -129,6 +136,8 @@ class Parent1Controller extends Controller
         }
 
         $parent->delete();
+        $this->userController->destroy($parent->user_id);
+
         return response()->json(
             [
                 'success' => true,
