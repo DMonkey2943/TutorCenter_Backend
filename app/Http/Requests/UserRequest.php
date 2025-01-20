@@ -40,15 +40,15 @@ class UserRequest extends FormRequest
             $password = $this->password;
 
             $rules = [];
-            if ($name) {
-                $rules['name'] = 'required|min:4';
-            }
-            if ($email) {
-                $rules['email'] = $emailRule;
-            }
-            if ($phone) {
-                $rules['phone'] = $phoneRule;
-            }
+            // if ($name) {
+            $rules['name'] = 'required|min:4';
+            // }
+            // if ($email) {
+            $rules['email'] = $emailRule;
+            // }
+            // if ($phone) {
+            $rules['phone'] = $phoneRule;
+            // }
             if ($password) {
                 $rules['password'] = 'required|min:8';
             }
