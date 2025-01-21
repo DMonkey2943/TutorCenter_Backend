@@ -19,6 +19,13 @@ class TutorController extends Controller
 {
     use HandleImageTrait;
 
+    protected $userController;
+
+    public function __construct(UserController $userController)
+    {
+        $this->userController = $userController;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -42,6 +49,22 @@ class TutorController extends Controller
         //
     }
 
+    public function createAccount(Request $request)
+    {
+        $tutor = new Tutor();
+        $tutor->fill($request->all());
+
+        $tutor->save();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $tutor,
+                'message' => 'Tạo gia sư thành công'
+            ],
+            201
+        );
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -52,21 +75,11 @@ class TutorController extends Controller
         $data['profile_status'] = 0;
 
         // Xử lý ảnh Avatar
-        $fileAvt = $request->file('avatar'); // Lấy file hình ảnh từ request
-        // $originalAvtName = Str::slug(pathinfo($fileAvt->getClientOriginalName(), PATHINFO_FILENAME)); // Lấy tên file gốc
-        // $avtExtension = $fileAvt->getClientOriginalExtension(); // Lấy phần mở rộng của file (jpg, png...)
-        // $newAvtName = Carbon::now()->format('Ymd_His') . '_' . $originalAvtName . '.' . $avtExtension; // Tạo tên mới cho file: YYYYMMDD_HHMMSS_avatar01.jpg
-        // $avtPath = $fileAvt->storeAs('images/avatars', $newAvtName, 'public'); // Lưu file vào thư mục 'images' trong 'public' disk
-        // $data['avatar'] = $avtPath;
+        $fileAvt = $request->file('avatar');
         $data['avatar'] = $this->uploadImage($fileAvt, 'images/avatars');
 
         // Xử lý ảnh Degree
         $fileDeg = $request->file('degree');
-        // $originalDegName = Str::slug(pathinfo($fileDeg->getClientOriginalName(), PATHINFO_FILENAME));
-        // $degExtension = $fileDeg->getClientOriginalExtension();
-        // $newDegName = Carbon::now()->format('Ymd_His') . '_' . $originalDegName . '.' . $degExtension;
-        // $degPath = $fileDeg->storeAs('images/degrees', $newDegName, 'public');
-        // $data['degree'] = $degPath;
         $data['degree'] = $this->uploadImage($fileDeg, 'images/degrees');
 
 
@@ -119,6 +132,7 @@ class TutorController extends Controller
     public function show($id)
     {
         $tutor = Tutor::with([
+            'user',
             'level',
             'tuition',
             'districts',
@@ -264,6 +278,8 @@ class TutorController extends Controller
         }
 
         $tutor->delete();
+        $this->userController->destroy($tutor->user_id);
+
         return response()->json(
             [
                 'success' => true,

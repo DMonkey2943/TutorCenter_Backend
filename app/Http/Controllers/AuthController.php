@@ -14,11 +14,13 @@ class AuthController extends Controller
 {
     protected $userController;
     protected $parent1Controller;
+    protected $tutorController;
 
-    public function __construct(UserController $userController, Parent1Controller $parent1Controller)
+    public function __construct(UserController $userController, Parent1Controller $parent1Controller, TutorController $tutorController)
     {
         $this->userController = $userController;
         $this->parent1Controller = $parent1Controller;
+        $this->tutorController = $tutorController;
     }
 
     /**
@@ -38,9 +40,11 @@ class AuthController extends Controller
                 ));
             }
             if ($user->role === 'tutor') {
-                // $tutor = Tutor::create([
-                //     'user_id' => $user->id
-                // ]);
+                $this->tutorController->createAccount(new Request(
+                    [
+                        'user_id' => $user->id
+                    ]
+                ));
             }
 
             return $response;

@@ -26,6 +26,7 @@ use App\Http\Controllers\UserController;
 Route::resource('users', UserController::class);
 Route::resource('parents', Parent1Controller::class);
 Route::resource('tutors', TutorController::class);
+Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
