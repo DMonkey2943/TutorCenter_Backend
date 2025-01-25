@@ -3,6 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Parent1Controller;
 use App\Http\Controllers\TutorController;
+use App\Http\Controllers\DistrictController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\GradeController;
+use App\Http\Controllers\LevelController;
+use App\Http\Controllers\TuitionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +32,12 @@ Route::resource('users', UserController::class);
 Route::resource('parents', Parent1Controller::class);
 Route::resource('tutors', TutorController::class);
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
+
+Route::get('/districts', [DistrictController::class, 'index'])->name('districts.index');
+Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
+Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
+Route::get('/levels', [LevelController::class, 'index'])->name('levels.index');
+Route::get('/tuitions', [TuitionController::class, 'index'])->name('tuitions.index');
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
