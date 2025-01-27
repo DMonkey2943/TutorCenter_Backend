@@ -30,6 +30,7 @@ use App\Http\Controllers\UserController;
 
 Route::resource('users', UserController::class);
 Route::resource('parents', Parent1Controller::class);
+Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
 

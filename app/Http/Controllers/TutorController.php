@@ -31,7 +31,12 @@ class TutorController extends Controller
      */
     public function index()
     {
-        $tutors = Tutor::with('user')->latest('id')->get();
+        $tutors = Tutor::with([
+            'user',
+            'level',
+            'subjects',
+            'grades'
+        ])->latest('id')->get();
         return response()->json(
             [
                 'success' => true,
@@ -90,19 +95,19 @@ class TutorController extends Controller
 
             $id = $profileTutor->id;
 
-            foreach ($data['district_id'] as $district) {
+            foreach ($data['districts'] as $district) {
                 TutorDistrict::create([
                     'tutor_id' => $id,
                     'district_id' => $district,
                 ]);
             };
-            foreach ($data['subject_id'] as $subject) {
+            foreach ($data['subjects'] as $subject) {
                 TutorSubject::create([
                     'tutor_id' => $id,
                     'subject_id' => $subject,
                 ]);
             };
-            foreach ($data['grade_id'] as $grade) {
+            foreach ($data['grades'] as $grade) {
                 TutorGrade::create([
                     'tutor_id' => $id,
                     'grade_id' => $grade,
@@ -169,6 +174,7 @@ class TutorController extends Controller
      */
     public function update(TutorRequest $request, $id)
     {
+        // dd($request->all(), $request->file('avatar'));
         $profileTutor = Tutor::find($id);
 
         if (!$profileTutor) {
@@ -217,15 +223,18 @@ class TutorController extends Controller
             $profileTutor->level_id = $data['level_id'];
             $profile_status = 0;
         }
+        if ($request->gender) {
+            $profileTutor->gender = $data['gender'];
+        }
         if ($request->address) {
             $profileTutor->address = $data['address'];
         }
         if ($request->birthday) {
             $profileTutor->birthday = $data['birthday'];
         }
-        if ($request->experiences) {
-            $profileTutor->experiences = $data['experiences'];
-        }
+        // if ($request->experiences) {
+        $profileTutor->experiences = $data['experiences'];
+        // }
         if ($request->tuition_id) {
             $profileTutor->tuition_id = $data['tuition_id'];
         }
@@ -234,14 +243,14 @@ class TutorController extends Controller
         try {
             $profileTutor->save();
 
-            if ($request->district_id) {
-                $profileTutor->districts()->sync($data['district_id']);
+            if ($request->districts) {
+                $profileTutor->districts()->sync($data['districts']);
             }
-            if ($request->subject_id) {
-                $profileTutor->subjects()->sync($data['subject_id']);
+            if ($request->subjects) {
+                $profileTutor->subjects()->sync($data['subjects']);
             }
-            if ($request->grade_id) {
-                $profileTutor->grades()->sync($data['grade_id']);
+            if ($request->grades) {
+                $profileTutor->grades()->sync($data['grades']);
             }
 
             return response()->json(

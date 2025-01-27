@@ -22,12 +22,14 @@ class TutorRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route()->user;
-        $avatarRule = 'required|image|max:2048';
-        $degreeRule = 'required|image|max:2048';
+        $avatarRule = '';
+        $degreeRule = '';
 
-        if ($id) {
-            $avatarRule = 'image|max:2048';
-            $degreeRule = 'image|max:2048';
+        if ($this->hasFile('avatar')) {
+            $avatarRule = 'nullable|image|max:2048';
+        }
+        if ($this->hasFile('avatar')) {
+            $degreeRule = 'nullable|image|max:2048';
         }
 
         return [
@@ -41,9 +43,9 @@ class TutorRequest extends FormRequest
             'degree' => $degreeRule,
             'level_id' => 'required',
             'tuition_id' => 'required',
-            'grade_id' => 'required',
-            'subject_id' => 'required',
-            'district_id' => 'required',
+            'grades' => 'required',
+            'subjects' => 'required',
+            'districts' => 'required',
         ];
     }
 
@@ -71,9 +73,9 @@ class TutorRequest extends FormRequest
             'degree' => 'Ảnh bằng cấp / Thẻ sinh viên',
             'level_id' => 'Trình độ',
             'tuition_id' => 'Học phí',
-            'grade_id' => 'Khối lớp dạy',
-            'subject_id' => 'Môn dạy',
-            'district_id' => 'Khu vực dạy',
+            'grades' => 'Khối lớp dạy',
+            'subjects' => 'Môn dạy',
+            'districts' => 'Khu vực dạy',
         ];
     }
 }
