@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Parent1Controller;
 use App\Http\Controllers\TutorController;
+use App\Http\Controllers\Class1Controller;
 use App\Http\Controllers\DistrictController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\GradeController;
@@ -32,6 +33,7 @@ Route::resource('users', UserController::class);
 Route::resource('parents', Parent1Controller::class);
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
+Route::resource('classes', Class1Controller::class);
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
 
 Route::get('/districts', [DistrictController::class, 'index'])->name('districts.index');
