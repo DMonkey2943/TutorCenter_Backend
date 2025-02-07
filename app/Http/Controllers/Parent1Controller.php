@@ -29,6 +29,23 @@ class Parent1Controller extends Controller
         );
     }
 
+    public function getAll()
+    {
+        $parents = Parent1::with('user')->get()->map(function ($parent) {
+            return [
+                'value' => $parent->id, // Đổi id thành value
+                'label' => "{$parent->id}: " . $parent->user->name, // Đổi name thành label (kiểm tra null)
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $parents,
+            'message' => 'Parents retrieved successfully'
+        ]);
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */
