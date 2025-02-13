@@ -276,4 +276,18 @@ class Class1Controller extends Controller
             ]
         );
     }
+    public function getAllNewClasses()
+    {
+        $classes = Class1::with([
+            'level',
+            'subjects',
+            'grade',
+            'address:id,ward_id',
+            'address.ward:id,name,district_id',
+            'address.ward.district:id,name',
+            'classTimes',
+        ])->where('status', 0)->latest()->paginate(6);
+
+        return response()->json($classes);
+    }
 }
