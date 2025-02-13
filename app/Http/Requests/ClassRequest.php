@@ -23,12 +23,12 @@ class ClassRequest extends FormRequest
     {
         return [
             'parent_id' => 'required',
-            'district_id' => '',
+            'district_id' => 'required',
             'ward_id' => 'required',
             'detail' => 'required',
             'subjects' => 'required',
             'grade_id' => 'required',
-            'num_of_sessions' => 'required',
+            'num_of_sessions' => '',
             'num_of_students' => 'required',
             'gender_tutor' => '',
             'level_id' => '',

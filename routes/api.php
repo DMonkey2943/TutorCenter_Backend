@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,11 +31,13 @@ use App\Http\Controllers\UserController;
 // });
 
 Route::resource('users', UserController::class);
+Route::get('parents/getAll', [Parent1Controller::class, 'getAll']);
 Route::resource('parents', Parent1Controller::class);
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
 Route::resource('classes', Class1Controller::class);
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
+Route::get('wards/getAllBelongToDistrict/{id}', [WardController::class, 'getAllBelongToDistrict']);
 
 Route::get('/districts', [DistrictController::class, 'index'])->name('districts.index');
 Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');

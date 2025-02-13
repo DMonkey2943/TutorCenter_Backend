@@ -20,7 +20,8 @@ class Class1Controller extends Controller
     public function index()
     {
         $classes = Class1::with([
-            'parent',
+            'parent:id,user_id',
+            'parent.user:id,name',
             'level',
             'subjects',
             'grade',
@@ -112,8 +113,9 @@ class Class1Controller extends Controller
     public function show($id)
     {
         $class = Class1::with([
-            'parent.user:id,name',
-            'tutor.user',
+            'parent.user:id,name,phone',
+            'tutor:id,user_id',
+            'tutor.user:id,name,phone',
             'level',
             'address.ward.district',
             'subjects',
