@@ -35,6 +35,7 @@ Route::get('parents/getAll', [Parent1Controller::class, 'getAll']);
 Route::resource('parents', Parent1Controller::class);
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
+Route::get('classes/get12Classes', [Class1Controller::class, 'get12Classes']);
 Route::resource('classes', Class1Controller::class);
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
 Route::get('wards/getAllBelongToDistrict/{id}', [WardController::class, 'getAllBelongToDistrict']);

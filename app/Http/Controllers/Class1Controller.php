@@ -252,4 +252,28 @@ class Class1Controller extends Controller
             204
         );
     }
+
+    public function get12Classes()
+    {
+        $classes = Class1::with([
+            'level',
+            'subjects',
+            'grade',
+            'address:id,ward_id',
+            'address.ward:id,name,district_id',
+            'address.ward.district:id,name',
+            'classTimes'
+        ])
+            ->where('status', 0)
+            ->latest()
+            ->take(12) // Lấy 12 bản ghi
+            ->get();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $classes,
+                'message' => '12 classes retrieved successfully'
+            ]
+        );
+    }
 }
