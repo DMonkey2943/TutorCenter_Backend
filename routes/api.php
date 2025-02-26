@@ -9,6 +9,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\TuitionController;
+use App\Http\Controllers\ApproveController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,13 +32,17 @@ use App\Http\Controllers\WardController;
 // });
 
 Route::resource('users', UserController::class);
+
 Route::get('parents/getAll', [Parent1Controller::class, 'getAll']);
 Route::resource('parents', Parent1Controller::class);
+
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
+
 Route::get('classes/get12Classes', [Class1Controller::class, 'get12Classes']);
 Route::get('classes/getAllNewClasses', [Class1Controller::class, 'getAllNewClasses']);
 Route::resource('classes', Class1Controller::class);
+
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
 Route::get('wards/getAllBelongToDistrict/{id}', [WardController::class, 'getAllBelongToDistrict']);
 
@@ -52,4 +57,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::get('account', 'profile')->middleware('auth:sanctum');
     Route::get('logout', 'logout')->middleware('auth:sanctum');
+});
+
+Route::controller(ApproveController::class)->group(function () {
+    Route::post('approval/enroll', 'store')->middleware('auth:sanctum');
 });
