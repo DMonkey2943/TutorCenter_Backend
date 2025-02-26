@@ -77,4 +77,9 @@ class Class1 extends Model
     {
         return $this->hasOne(Report::class, 'class_id', 'id');
     }
+
+    public function approvals()
+    {
+        return $this->hasMany(Approve::class, 'class_id', 'id');
+    }
 }

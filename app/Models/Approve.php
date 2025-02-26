@@ -47,7 +47,7 @@ class Approve extends Pivot
 
     public function class()
     {
-        return $this->belongsTo(Class1::class, 'class_id', 'if');
+        return $this->belongsTo(Class1::class, 'class_id', 'id');
     }
 
     public function tutor()

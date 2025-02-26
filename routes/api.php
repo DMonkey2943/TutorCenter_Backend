@@ -41,6 +41,8 @@ Route::resource('tutors', TutorController::class);
 
 Route::get('classes/get12Classes', [Class1Controller::class, 'get12Classes']);
 Route::get('classes/getAllNewClasses', [Class1Controller::class, 'getAllNewClasses']);
+Route::get('classes/getEnrolledClasses', [Class1Controller::class, 'getEnrolledClasses'])->middleware('auth:sanctum');
+Route::get('classes/getConfirmedClasses', [Class1Controller::class, 'getConfirmedClasses'])->middleware('auth:sanctum');
 Route::resource('classes', Class1Controller::class);
 
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);

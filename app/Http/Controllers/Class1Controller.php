@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class Class1Controller extends Controller
 {
@@ -276,9 +277,10 @@ class Class1Controller extends Controller
             ]
         );
     }
+
     public function getAllNewClasses()
     {
-        $classes = Class1::with([
+        $query = Class1::with([
             'level',
             'subjects',
             'grade',
@@ -286,8 +288,95 @@ class Class1Controller extends Controller
             'address.ward:id,name,district_id',
             'address.ward.district:id,name',
             'classTimes',
-        ])->where('status', 0)->latest()->paginate(6);
+        ])->where('status', 0);
+
+        // Nếu người dùng đã đăng nhập và có tutor, lấy thêm approvals
+        // dd(Auth::check());
+        // if (Auth::check() && Auth::user()->tutor) {
+        //     $tutor = Auth::user()->tutor;
+        //     $query->with(['approvals' => function ($query) use ($tutor) {
+        //         $query->where('tutor_id', $tutor->id)
+        //             ->select('tutor_id', 'class_id', 'status');
+        //     }]);
+        // }
+
+        $classes = $query->latest()->paginate(6);
 
         return response()->json($classes);
+    }
+
+    public function getEnrolledClasses()
+    {
+        $tutor = Auth::user()->tutor;
+
+        if (!$tutor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gia sư không hợp lệ'
+            ], 400);
+        }
+
+        try {
+            $classes = Class1::whereHas('approvals', function ($query) use ($tutor) {
+                $query->where('tutor_id', $tutor->id);
+            })->with([
+                'level',
+                'subjects',
+                'grade',
+                'address:id,ward_id',
+                'address.ward:id,name,district_id',
+                'address.ward.district:id,name',
+                'classTimes',
+                'approvals' => function ($query) use ($tutor) {
+                    $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
+                }
+            ])->latest()->paginate(6);
+
+            return response()->json($classes);
+        } catch (Exception $e) {
+            Log::error('Unable to enroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi đăng ký nhận lớp: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function getConfirmedClasses()
+    {
+        $tutor = Auth::user()->tutor;
+
+        if (!$tutor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gia sư không hợp lệ'
+            ], 400);
+        }
+
+        try {
+            $classes = Class1::whereHas('approvals', function ($query) use ($tutor) {
+                $query->where('tutor_id', $tutor->id)
+                    ->where('status', 1); //Cần GS xác nhận nhận dạy
+            })->with([
+                'level',
+                'subjects',
+                'grade',
+                'address:id,ward_id',
+                'address.ward:id,name,district_id',
+                'address.ward.district:id,name',
+                'classTimes',
+                'approvals' => function ($query) use ($tutor) {
+                    $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
+                }
+            ])->latest()->paginate(6);
+
+            return response()->json($classes);
+        } catch (Exception $e) {
+            Log::error('Unable to enroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi truy xuất lớp học: ' . $e->getMessage()
+            ], 400);
+        }
     }
 }
