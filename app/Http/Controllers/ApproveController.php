@@ -93,8 +93,38 @@ class ApproveController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Approve $approve)
+    public function destroy($classId)
     {
-        //
+        try {
+            $tutor = Auth::user()->tutor;
+
+            $approval = Approve::where('class_id', $classId)
+                ->where('tutor_id', $tutor->id);
+            if (!$approval) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Tutor or class not found'
+                    ],
+                    404
+                );
+            }
+
+            $approval->delete();
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'Unenrolling class successfully'
+                ],
+                204
+            );
+        } catch (Exception $e) {
+            Log::error('Unable to unenroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi hủy đăng ký nhận lớp: ' . $e->getMessage()
+            ], 400);
+        }
+        
     }
 }

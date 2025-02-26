@@ -63,4 +63,5 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::controller(ApproveController::class)->group(function () {
     Route::post('approval/enroll', 'store')->middleware('auth:sanctum');
+    Route::delete('approval/unenroll/{classId}', 'destroy')->middleware('auth:sanctum');
 });
