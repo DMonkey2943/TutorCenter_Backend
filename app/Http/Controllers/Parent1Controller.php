@@ -163,4 +163,27 @@ class Parent1Controller extends Controller
             204
         );
     }
+
+    public function getParentByUserId($userId)
+    {
+        $parent = Parent1::where('user_id', $userId)->first();
+
+        if (!$parent) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Parent not found'
+                ],
+                404
+            );
+        }
+
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $parent,
+                'message' => 'Parent retrieved successfully'
+            ]
+        );
+    }
 }

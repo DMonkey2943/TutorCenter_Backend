@@ -34,6 +34,7 @@ use App\Http\Controllers\WardController;
 Route::resource('users', UserController::class);
 
 Route::get('parents/getAll', [Parent1Controller::class, 'getAll']);
+Route::get('parents/user/{userId}', [Parent1Controller::class, 'getParentByUserId']);
 Route::resource('parents', Parent1Controller::class);
 
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
