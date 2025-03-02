@@ -44,6 +44,7 @@ Route::get('classes/get12Classes', [Class1Controller::class, 'get12Classes']);
 Route::get('classes/getAllNewClasses', [Class1Controller::class, 'getAllNewClasses']);
 Route::get('classes/getEnrolledClasses', [Class1Controller::class, 'getEnrolledClasses'])->middleware('auth:sanctum');
 Route::get('classes/getConfirmedClasses', [Class1Controller::class, 'getConfirmedClasses'])->middleware('auth:sanctum');
+Route::get('classes/getRegisteredClasses', [Class1Controller::class, 'getRegisterdClasses'])->middleware('auth:sanctum');
 Route::resource('classes', Class1Controller::class);
 
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
@@ -65,4 +66,5 @@ Route::controller(AuthController::class)->group(function () {
 Route::controller(ApproveController::class)->group(function () {
     Route::post('approval/enroll', 'store')->middleware('auth:sanctum');
     Route::delete('approval/unenroll/{classId}', 'destroy')->middleware('auth:sanctum');
+    Route::patch('approval/{classId}', 'update')->middleware('auth:sanctum');
 });

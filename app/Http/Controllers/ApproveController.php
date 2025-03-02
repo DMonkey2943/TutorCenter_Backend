@@ -33,15 +33,15 @@ class ApproveController extends Controller
 
         try {
             $isEnroll = Approve::where('class_id', $class_id)
-            ->where('tutor_id', $tutor->id)->exists(); 
+                ->where('tutor_id', $tutor->id)->exists();
 
-            if(!$isEnroll) {
+            if (!$isEnroll) {
                 $approve = Approve::create([
                     'class_id' => $class_id,
                     'tutor_id' => $tutor->id,
                     'status' => 0,
                 ]);
-    
+
                 return response()->json(
                     [
                         'success' => true,
@@ -85,9 +85,39 @@ class ApproveController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Approve $approve)
+    public function update(Request $request, $classId)
     {
-        //
+        $tutor_id = $request->tutor_id;
+        $status = $request->status;
+
+        $approval = Approve::where('class_id', $classId)
+            ->where('tutor_id', $tutor_id)
+            ->first();
+
+        if (!$approval) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi xét duyệt gia sư'
+            ], 404);
+        }
+
+        try {
+            $approval->update([
+                'status' => $status ?? $approval->status,
+            ]);
+            return response()->json([
+                'success' => true,
+                'data' => $approval,
+                'message' => 'Xét duyệt thành công'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi xét duyệt gia sư: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi xét duyệt gia sư: ' . $e->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -125,6 +155,5 @@ class ApproveController extends Controller
                 'message' => 'Lỗi hủy đăng ký nhận lớp: ' . $e->getMessage()
             ], 400);
         }
-        
     }
 }

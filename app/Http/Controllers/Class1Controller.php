@@ -121,7 +121,8 @@ class Class1Controller extends Controller
             'address.ward.district',
             'subjects',
             'grade',
-            'classTimes'
+            'classTimes',
+            'approvals:tutor_id,class_id,status'
         ])->find($id);
 
         if (!$class) {
@@ -337,7 +338,7 @@ class Class1Controller extends Controller
             Log::error('Unable to enroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
             return response()->json([
                 'success' => false,
-                'message' => 'Lỗi đăng ký nhận lớp: ' . $e->getMessage()
+                'message' => 'Lỗi truy xuất lớp học: ' . $e->getMessage()
             ], 400);
         }
     }
@@ -368,6 +369,48 @@ class Class1Controller extends Controller
                 'approvals' => function ($query) use ($tutor) {
                     $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
                 }
+            ])->latest()->paginate(6);
+
+            return response()->json($classes);
+        } catch (Exception $e) {
+            Log::error('Unable to enroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi truy xuất lớp học: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function getRegisterdClasses()
+    {
+        $parent = Auth::user()->parent;
+
+        if (!$parent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Phụ huynh không hợp lệ'
+            ], 400);
+        }
+
+        try {
+            $classes = Class1::where('parent_id', $parent->id)->with([
+                // 'level',
+                // 'subjects',
+                // 'grade',
+                // 'address:id,ward_id',
+                // 'address.ward:id,name,district_id',
+                // 'address.ward.district:id,name',
+                // 'classTimes',
+                // 'approvals' => function ($query) use ($tutor) {
+                //     $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
+                // },
+                'tutor:id,user_id',
+                'tutor.user:id,name,phone',
+                'level',
+                'address.ward.district',
+                'subjects',
+                'grade',
+                'classTimes'
             ])->latest()->paginate(6);
 
             return response()->json($classes);

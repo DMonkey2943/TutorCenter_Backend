@@ -15,7 +15,7 @@ class Approve extends Pivot
     protected $fillable = ['class_id', 'tutor_id', 'status',];
     // protected $guarded = ['class_id', 'tt_id',];
 
-    protected $primaryKey = ['class_id', 'tt_id',];
+    protected $primaryKey = ['class_id', 'tutor_id',];
     public $incrementing = false; // Vô hiệu hóa tính năng auto-increment (vì khóa chính không tự động tăng)
 
     public $timestamps = true;
