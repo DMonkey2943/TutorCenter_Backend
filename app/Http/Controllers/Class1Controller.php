@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Approve;
 
 class Class1Controller extends Controller
 {
@@ -306,7 +307,7 @@ class Class1Controller extends Controller
         return response()->json($classes);
     }
 
-    public function getEnrolledClasses()
+    public function getEnrolledClasses() //for tutors
     {
         $tutor = Auth::user()->tutor;
 
@@ -343,7 +344,7 @@ class Class1Controller extends Controller
         }
     }
 
-    public function getConfirmedClasses()
+    public function getConfirmedClasses() //for tutors
     {
         $tutor = Auth::user()->tutor;
 
@@ -357,7 +358,7 @@ class Class1Controller extends Controller
         try {
             $classes = Class1::whereHas('approvals', function ($query) use ($tutor) {
                 $query->where('tutor_id', $tutor->id)
-                    ->where('status', 1); //Cần GS xác nhận nhận dạy
+                    ->where('status', 1);
             })->with([
                 'level',
                 'subjects',
@@ -381,7 +382,67 @@ class Class1Controller extends Controller
         }
     }
 
-    public function getRegisterdClasses()
+    public function confirmClassTeaching($classId)
+    { //for tutors
+        $tutor = Auth::user()->tutor;
+        if (!$tutor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không phải là gia sư!'
+            ], 403);
+        }
+
+        // Kiểm tra xem gia sư đã được duyệt chưa
+        $approved = Approve::where('class_id', $classId)
+            ->where('tutor_id', $tutor->id)
+            ->where('status', 1)
+            ->exists();
+        if (!$approved) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn chưa được duyệt để dạy lớp này!'
+            ], 403);
+        }
+
+        // Tìm lớp học
+        $class = Class1::find($classId);
+
+        if (!$class) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lớp học không tồn tại!'
+            ], 404);
+        }
+
+        // Kiểm tra xem lớp đã có gia sư nhận dạy chưa
+        if ($class->status == 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lớp học này đã có gia sư nhận dạy!'
+            ], 400);
+        }
+
+        try {
+            $class->update([
+                'status' => 1,
+                'tutor_id' => $tutor->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xác nhận dạy lớp thành công!',
+                // 'data' => $class
+            ]);
+        } catch (Exception $e) {
+            Log::error('Unable to confirm class teaching: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi xác nhận nhận lớp học: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function getRegisterdClasses() //for parents
     {
         $parent = Auth::user()->parent;
 
@@ -394,16 +455,6 @@ class Class1Controller extends Controller
 
         try {
             $classes = Class1::where('parent_id', $parent->id)->with([
-                // 'level',
-                // 'subjects',
-                // 'grade',
-                // 'address:id,ward_id',
-                // 'address.ward:id,name,district_id',
-                // 'address.ward.district:id,name',
-                // 'classTimes',
-                // 'approvals' => function ($query) use ($tutor) {
-                //     $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
-                // },
                 'tutor:id,user_id',
                 'tutor.user:id,name,phone',
                 'level',

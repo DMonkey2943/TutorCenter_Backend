@@ -37,6 +37,7 @@ Route::get('parents/getAll', [Parent1Controller::class, 'getAll']);
 Route::get('parents/user/{userId}', [Parent1Controller::class, 'getParentByUserId']);
 Route::resource('parents', Parent1Controller::class);
 
+Route::get('tutors/user/{userId}', [TutorController::class, 'getTutorByUserId']);
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
 
@@ -44,6 +45,7 @@ Route::get('classes/get12Classes', [Class1Controller::class, 'get12Classes']);
 Route::get('classes/getAllNewClasses', [Class1Controller::class, 'getAllNewClasses']);
 Route::get('classes/getEnrolledClasses', [Class1Controller::class, 'getEnrolledClasses'])->middleware('auth:sanctum');
 Route::get('classes/getConfirmedClasses', [Class1Controller::class, 'getConfirmedClasses'])->middleware('auth:sanctum');
+Route::patch('classes/confirmClassTeaching/{classId}', [Class1Controller::class, 'confirmClassTeaching'])->middleware('auth:sanctum');
 Route::get('classes/getRegisteredClasses', [Class1Controller::class, 'getRegisterdClasses'])->middleware('auth:sanctum');
 Route::resource('classes', Class1Controller::class);
 

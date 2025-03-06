@@ -297,4 +297,27 @@ class TutorController extends Controller
             204
         );
     }
+
+    public function getTutorByUserId($userId)
+    {
+        $tutor = Tutor::where('user_id', $userId)->first();
+
+        if (!$tutor) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Tutor not found'
+                ],
+                404
+            );
+        }
+
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $tutor,
+                'message' => 'Tutor retrieved successfully'
+            ]
+        );
+    }
 }
