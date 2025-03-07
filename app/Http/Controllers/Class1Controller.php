@@ -86,6 +86,17 @@ class Class1Controller extends Controller
                 ]);
             };
 
+            // Kiểm tra và xử lý danh sách tutors nếu phụ huynh có chọn gia sư
+            if (isset($data['tutors']) && !empty($data['tutors'])) {
+                foreach ($data['tutors'] as $tutor_id) {
+                    Approve::create([
+                        'class_id' => $id,
+                        'tutor_id' => $tutor_id,
+                        'status' => 1,
+                    ]);
+                }
+            }
+
             // Nếu tất cả thành công, commit transaction
             DB::commit();
 

@@ -320,4 +320,22 @@ class TutorController extends Controller
             ]
         );
     }
+
+    public function getAvailableTutors() {
+        $tutors = Tutor::with([
+            'user',
+            'level',
+            'subjects',
+            'grades',
+            'tuition',
+            'districts',
+        ])->where('profile_status', 1)->latest('id')->get();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $tutors,
+                'message' => 'Available tutors retrieved successfully'
+            ]
+        );
+    }
 }
