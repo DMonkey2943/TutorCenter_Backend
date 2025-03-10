@@ -321,7 +321,8 @@ class TutorController extends Controller
         );
     }
 
-    public function getAvailableTutors() {
+    public function getAvailableTutors()
+    {
         $tutors = Tutor::with([
             'user',
             'level',
@@ -337,5 +338,43 @@ class TutorController extends Controller
                 'message' => 'Available tutors retrieved successfully'
             ]
         );
+    }
+
+    public function approveProfile(Request $request, $id)
+    {
+        $profileTutor = Tutor::find($id);
+
+        if (!$profileTutor) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Tutor\'s profile not found'
+                ],
+                404
+            );
+        }
+
+        try {
+            $profileTutor->profile_status = $request->profile_status;
+
+            if ($request->profile_reason) {
+                $profileTutor->profile_reason = $request->profile_reason;
+            }
+
+            $profileTutor->save();
+            return response()->json(
+                [
+                    'success' => true,
+                    'data' => $profileTutor,
+                    'message' => 'Approving tutor\'s profile successfully'
+                ]
+            );
+        } catch (Exception $e) {
+            Log::error('Unable to approve tutor\'s profile: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi xét duyệt hồ sơ gia sư: ' . $e->getMessage()
+            ], 400);
+        }
     }
 }

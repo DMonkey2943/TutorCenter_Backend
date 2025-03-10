@@ -39,6 +39,7 @@ Route::resource('parents', Parent1Controller::class);
 
 Route::get('tutors/user/{userId}', [TutorController::class, 'getTutorByUserId']);
 Route::get('tutors/available', [TutorController::class, 'getAvailableTutors']);
+Route::patch('tutors/{id}/approve', [TutorController::class, 'approveProfile']);
 Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
 Route::resource('tutors', TutorController::class);
 
