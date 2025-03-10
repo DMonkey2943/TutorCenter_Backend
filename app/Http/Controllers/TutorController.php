@@ -321,23 +321,82 @@ class TutorController extends Controller
         );
     }
 
-    public function getAvailableTutors()
+    public function getAvailableTutors(Request $request)
     {
-        $tutors = Tutor::with([
-            'user',
-            'level',
-            'subjects',
-            'grades',
-            'tuition',
-            'districts',
-        ])->where('profile_status', 1)->latest('id')->get();
-        return response()->json(
-            [
-                'success' => true,
-                'data' => $tutors,
-                'message' => 'Available tutors retrieved successfully'
-            ]
-        );
+        Log::info("getAvailableTutors - request:");
+        Log::info($request);
+        $validated = $request->validate([
+            'district_id' => 'nullable|integer',
+            'subjects' => 'nullable|array',
+            'subjects.*' => 'integer',
+            'grade_id' => 'nullable|integer',
+            'level_id' => 'nullable|integer',
+            'gender' => 'nullable|in:M,F',
+        ]);
+
+        try {
+            $query  = Tutor::with([
+                'user',
+                'level',
+                'subjects',
+                'grades',
+                'tuition',
+                'districts',
+            ])->where('profile_status', 1);
+
+            // Filter by subject - get tutors who can teach ALL requested subjects
+            if (!empty($validated['subjects'])) {
+                $subjectIds = $validated['subjects'];
+
+                // For each subject, get tutors who can teach it
+                foreach ($subjectIds as $subjectId) {
+                    $query->whereHas('subjects', function ($q) use ($subjectId) {
+                        $q->where('subject_id', $subjectId);
+                    });
+                }
+            }
+
+            // Filter by grade
+            if (!empty($validated['grade_id'])) {
+                $query->whereHas('grades', function ($q) use ($validated) {
+                    $q->where('grade_id', $validated['grade_id']);
+                });
+            }
+
+            // Filter by district if provided
+            if (!empty($validated['district_id'])) {
+                $query->whereHas('districts', function ($q) use ($validated) {
+                    $q->where('district_id', $validated['district_id']);
+                });
+            }
+
+            // Filter by tutor level if provided
+            if (!empty($validated['level_id'])) {
+                $query->where('level_id', $validated['level_id']);
+            }
+
+            // Filter by gender if provided
+            if (!empty($validated['gender'])) {
+                $query->where('gender', $validated['gender']);
+            }
+
+            // Get the filtered tutors
+            $tutors = $query->latest('id')->get();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'data' => $tutors,
+                    'message' => 'Available tutors retrieved successfully'
+                ]
+            );
+        } catch (Exception $e) {
+            Log::error('Unable to filter tutors for class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi lọc gia sư phù hợp cho lớp học: ' . $e->getMessage()
+            ], 400);
+        }
     }
 
     public function approveProfile(Request $request, $id)
