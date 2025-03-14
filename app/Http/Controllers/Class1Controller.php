@@ -475,7 +475,7 @@ class Class1Controller extends Controller
             
             // Gửi email thông báo
             Log::info("Bắt đầu Gửi email thông báo");
-            Mail::to($tutorInfo->email)->send(new TutorAcceptedMail($tutorInfo, $classInfo, $parentInfo));
+            Mail::to($tutorInfo->email)->queue(new TutorAcceptedMail($tutorInfo, $classInfo, $parentInfo));
             Log::info("Kết thúc Gửi email thông báo");
 
 
