@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Approve;
+use App\Mail\TutorAcceptedMail;
+use Illuminate\Support\Facades\Mail;
 
 class Class1Controller extends Controller
 {
@@ -416,7 +418,12 @@ class Class1Controller extends Controller
         }
 
         // Tìm lớp học
-        $class = Class1::find($classId);
+        $class = Class1::with([
+            'grade',
+            'subjects',
+            'classTimes',
+            'address.ward.district',
+        ])->find($classId);
 
         if (!$class) {
             return response()->json([
@@ -438,6 +445,39 @@ class Class1Controller extends Controller
                 'status' => 1,
                 'tutor_id' => $tutor->id
             ]);
+
+            $tutorInfo = $tutor->user;
+
+            $parent = $class->parent->user;
+            $parentInfo = [
+                'name' => $parent->name,
+                'phone' => $parent->phone,
+            ];
+
+            // Xây dựng địa chỉ hoàn chỉnh
+            $addressDetail = optional($class->address)->detail ?? 'N/A';
+            $wardName = optional($class->address->ward)->name ?? 'N/A';
+            $districtName = optional($class->address->ward->district)->name ?? 'N/A';
+            $fullAddress = "{$addressDetail}, {$wardName}, {$districtName}";
+
+            $classInfo = [
+                'id' => $class->id,
+                'grade' => $class->grade->name ?? 'N/A',
+                'address' => $fullAddress,
+                'subjects' => $class->subjects->pluck('name')->toArray(),
+                'tuition' => $class->tuition,
+                'classTimes' => $class->classTimes->map(fn($time) => [
+                    'day' => $time->day,
+                    'start' => $time->start,
+                    'end' => $time->end
+                ]),
+            ];
+            
+            // Gửi email thông báo
+            Log::info("Bắt đầu Gửi email thông báo");
+            Mail::to($tutorInfo->email)->send(new TutorAcceptedMail($tutorInfo, $classInfo, $parentInfo));
+            Log::info("Kết thúc Gửi email thông báo");
+
 
             return response()->json([
                 'success' => true,
