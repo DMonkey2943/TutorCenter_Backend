@@ -9,6 +9,8 @@ use App\Models\Tutor;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -147,6 +149,43 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lỗi đăng xuất: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        // Validate dữ liệu đầu vào
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8',
+        ]);
+
+        try {
+            // Lấy user hiện tại
+            $user = Auth::user();
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mật khẩu hiện tại không chính xác'
+                ], 422);
+            }
+
+            // Cập nhật mật khẩu mới
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đổi mật khẩu thành công'
+            ]);
+        } catch (Exception $e) {
+            Log::error('Unable to Change password: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi thay đổi mật khẩu: ' . $e->getMessage()
             ], 400);
         }
     }

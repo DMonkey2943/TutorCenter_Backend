@@ -63,6 +63,7 @@ Route::get('/tuitions', [TuitionController::class, 'index'])->name('tuitions.ind
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('login', 'login');
+    Route::post('account/changePassword', 'changePassword')->middleware('auth:sanctum');
     Route::get('account', 'profile')->middleware('auth:sanctum');
     Route::get('logout', 'logout')->middleware('auth:sanctum');
 });
