@@ -33,6 +33,7 @@ class ClassRequest extends FormRequest
             'gender_tutor' => '',
             'level_id' => '',
             'tuition' => 'required',
+            'start_date' => 'required|date|after_or_equal:today',
             'request' => '',
             'times' => 'required', //Thoi gian hoc
         ];
@@ -42,6 +43,8 @@ class ClassRequest extends FormRequest
     {
         return [
             'required' => ':attribute không được để trống',
+            'date' => ':attribute không đúng định dạng',
+            'after_or_equal' => ':attribute phải từ hôm nay trở đi'
         ];
     }
 
@@ -61,6 +64,7 @@ class ClassRequest extends FormRequest
             'tuition' => 'Học phí',
             'request' => 'Yêu cầu khác',
             'times' => 'Thời gian học', //Thoi gian hoc
+            'start_date' => 'Ngày dự kiến bắt đầu'
         ];
     }
 }

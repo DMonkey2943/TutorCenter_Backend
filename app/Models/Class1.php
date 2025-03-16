@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class Class1 extends Model
 {
@@ -27,10 +28,18 @@ class Class1 extends Model
         'tutor_id',
         'parent_id',
         'deleted_at',
+        'start_date',
+        'end_date',
     ];
     protected $guarded = ['id'];
 
     protected $primaryKey = 'id';
+
+    // Mutator: Chuyển đổi start_date trước khi lưu vào CSDL
+    public function setStartDateAttribute($value)
+    {
+        $this->attributes['start_date'] = Carbon::parse($value)->format('Y-m-d H:i:s');
+    }
 
     public function address()
     {
