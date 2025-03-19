@@ -91,4 +91,9 @@ class Class1 extends Model
     {
         return $this->hasMany(Approve::class, 'class_id', 'id');
     }
+
+    public function rate()
+    {
+        return $this->hasOne(Rate::class, 'class_id', 'id');
+    }
 }

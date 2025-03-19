@@ -16,6 +16,7 @@ class Rate extends Model
         'comment',
         'tutor_id',
         'parent_id',
+        'class_id',
     ];
     protected $guarded = ['id'];
 
@@ -29,5 +30,10 @@ class Rate extends Model
     public function parent()
     {
         return $this->belongsTo(Parent1::class, 'parent_id', 'id');
+    }
+
+    public function class()
+    {
+        return $this->belongsTo(Class1::class, 'class_id', 'id');
     }
 }
