@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Approve;
 use App\Mail\TutorAcceptedMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Carbon;
 
 class Class1Controller extends Controller
 {
@@ -472,7 +473,7 @@ class Class1Controller extends Controller
                     'end' => $time->end
                 ]),
             ];
-            
+
             // Gửi email thông báo
             Log::info("Bắt đầu Gửi email thông báo");
             Mail::to($tutorInfo->email)->queue(new TutorAcceptedMail($tutorInfo, $classInfo, $parentInfo));
@@ -521,6 +522,44 @@ class Class1Controller extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lỗi truy xuất lớp học: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function completeClass(Request $request, $classId)
+    {
+        $class = Class1::findOrFail($classId);
+
+        if (!$class) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Class not found'
+            ], 404);
+        }
+
+        if ($class->status != 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ có lớp học đã giao mới có thể kết thúc được'
+            ], 400);
+        }
+
+        try {
+            $class->update([
+                'status' => 2,
+                'end_date' => Carbon::now()->toDateString()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $class,
+                'message' => 'Cập nhật lớp học thành công'
+            ]);
+        } catch (Exception $e) {
+            Log::error('Unable to complete class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi kết thúc lớp học: ' . $e->getMessage()
             ], 400);
         }
     }

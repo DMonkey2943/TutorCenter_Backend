@@ -10,6 +10,7 @@ use App\Http\Controllers\GradeController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\TuitionController;
 use App\Http\Controllers\ApproveController;
+use App\Http\Controllers\RateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,7 @@ Route::get('classes/getEnrolledClasses', [Class1Controller::class, 'getEnrolledC
 Route::get('classes/getConfirmedClasses', [Class1Controller::class, 'getConfirmedClasses'])->middleware('auth:sanctum');
 Route::patch('classes/confirmClassTeaching/{classId}', [Class1Controller::class, 'confirmClassTeaching'])->middleware('auth:sanctum');
 Route::get('classes/getRegisteredClasses', [Class1Controller::class, 'getRegisterdClasses'])->middleware('auth:sanctum');
+Route::patch('classes/completeClass/{classId}', [Class1Controller::class, 'completeClass'])->middleware('auth:sanctum');
 Route::resource('classes', Class1Controller::class);
 
 Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
@@ -59,6 +61,9 @@ Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.ind
 Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
 Route::get('/levels', [LevelController::class, 'index'])->name('levels.index');
 Route::get('/tuitions', [TuitionController::class, 'index'])->name('tuitions.index');
+
+Route::get('/rates/{classId}', [RateController::class, 'show']);
+Route::post('/rates', [RateController::class, 'store']);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
