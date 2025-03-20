@@ -77,6 +77,12 @@ class Tutor extends Model
     public function rates()
     {
         return $this->hasMany(Rate::class, 'tutor_id', 'id');
+    } 
+    
+    // tính toán trung bình trực tiếp trong model
+    public function getAverageRatingAttribute()
+    {
+        return $this->rates()->avg('stars');
     }
 
     public function reports()

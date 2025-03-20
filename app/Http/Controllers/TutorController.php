@@ -436,4 +436,41 @@ class TutorController extends Controller
             ], 400);
         }
     }
+
+    public function getAverageRating($id)
+    {
+        try {
+            $tutor = Tutor::findOrFail($id);
+
+            if (!$tutor) {
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Tutor not found'
+                    ],
+                    404
+                );
+            }
+
+            $averageRating = $tutor->average_rating;
+            $totalRatings = $tutor->rates()->count();
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'data' => [
+                        'average_rating' => round($averageRating, 1), // Làm tròn đến 1 chữ số thập phân
+                        'total_ratings' => $totalRatings
+                    ],
+                    'message' => 'Get tutor\'s average rating successfully'
+                ]
+            );
+        } catch (Exception $e) {
+            Log::error('Unable to Get tutor\'s average rating: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi lấy đánh giá trung bình của gia sư: ' . $e->getMessage()
+            ], 400);
+        }
+    }
 }
