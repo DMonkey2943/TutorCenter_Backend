@@ -11,6 +11,7 @@ use App\Http\Controllers\LevelController;
 use App\Http\Controllers\TuitionController;
 use App\Http\Controllers\ApproveController;
 use App\Http\Controllers\RateController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -85,3 +86,6 @@ Route::controller(ApproveController::class)->group(function () {
     Route::delete('approval/unenroll/{classId}', 'destroy')->middleware('auth:sanctum');
     Route::patch('approval/{classId}', 'update')->middleware('auth:sanctum');
 });
+
+// RATES
+Route::post('/reports', [ReportController::class, 'store']);
