@@ -18,7 +18,18 @@ class ReportController extends Controller
      */
     public function index()
     {
-        //
+        $reports = Report::with([
+            'class:id',
+            'tutor:id,user_id',
+            'tutor.user:id,name',
+        ])->latest('id')->get();
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $reports,
+                'message' => 'Reports retrieved successfully'
+            ]
+        );
     }
 
     /**
@@ -78,9 +89,30 @@ class ReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Report $report)
+    public function show($id)
     {
-        //
+        $report = Report::with([
+            'class:id,parent_id,start_date',
+            'class.parent:id,user_id',
+            'class.parent.user:id,name,phone,email',
+            'tutor:id,user_id',
+            'tutor.user:id,name,phone,email',
+        ])->find($id);
+
+        if (!$report) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Report not found'
+            ], 404);
+        }
+
+        return response()->json(
+            [
+                'success' => true,
+                'data' => $report,
+                'message' => 'Report retrieved successfully'
+            ]
+        );
     }
 
     /**
@@ -94,9 +126,41 @@ class ReportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Report $report)
+    public function update(Request $request, $id)
     {
-        //
+        $report = Report::find($id);
+
+        if (!$report) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Report not found'
+                ],
+                404
+            );
+        }
+
+        $request->validate([
+            'response' => 'required|string',
+        ]);
+
+        try {
+            $report->response = $request->response;
+            $report->status = 1;
+            $report->save();
+
+            return response()->json([
+                    'success' => true,
+                    'data' => $report,
+                    'message' => 'Xử lý báo cáo của gia sư thành công'
+                ]);
+        } catch (Exception $e) {
+            Log::error('Unable to handle report: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi Xử lý báo cáo của gia sư: ' . $e->getMessage()
+            ], 400);
+        }
     }
 
     /**
