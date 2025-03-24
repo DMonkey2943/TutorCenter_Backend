@@ -95,7 +95,7 @@ class Class1Controller extends Controller
                     Approve::create([
                         'class_id' => $id,
                         'tutor_id' => $tutor_id,
-                        'status' => 1,
+                        'status' => 2,
                     ]);
                 }
             }
@@ -409,7 +409,7 @@ class Class1Controller extends Controller
         // Kiểm tra xem gia sư đã được duyệt chưa
         $approved = Approve::where('class_id', $classId)
             ->where('tutor_id', $tutor->id)
-            ->where('status', 1)
+            ->whereIn('status', [1, 2])
             ->exists();
         if (!$approved) {
             return response()->json([
