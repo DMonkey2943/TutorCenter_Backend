@@ -92,3 +92,4 @@ Route::get('/reports', [ReportController::class, 'index']);
 Route::get('/reports/{id}', [ReportController::class, 'show']);
 Route::post('/reports', [ReportController::class, 'store']);
 Route::patch('/reports/{id}', [ReportController::class, 'update']);
+Route::get('/reports/classes/{classId}', [ReportController::class, 'getTutorReportsForClass']);

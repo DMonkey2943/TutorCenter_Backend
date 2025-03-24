@@ -150,10 +150,10 @@ class ReportController extends Controller
             $report->save();
 
             return response()->json([
-                    'success' => true,
-                    'data' => $report,
-                    'message' => 'Xử lý báo cáo của gia sư thành công'
-                ]);
+                'success' => true,
+                'data' => $report,
+                'message' => 'Xử lý báo cáo của gia sư thành công'
+            ]);
         } catch (Exception $e) {
             Log::error('Unable to handle report: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
             return response()->json([
@@ -169,5 +169,33 @@ class ReportController extends Controller
     public function destroy(Report $report)
     {
         //
+    }
+
+    public function getTutorReportsForClass($classId)
+    {
+        $class = Class1::find($classId);
+
+        if (!$class) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tutor không tồn tại'
+            ], 404);
+        }
+
+        try {
+            $reports = $class->reports()->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $reports,
+                'message' => 'Lấy các báo cáo của gia sư cho lớp học thành công'
+            ]);
+        } catch (Exception $e) {
+            Log::error('Unable to retrieve tutor\'s reports for class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi Lấy các báo cáo của gia sư cho lớp học: ' . $e->getMessage()
+            ], 400);
+        }
     }
 }

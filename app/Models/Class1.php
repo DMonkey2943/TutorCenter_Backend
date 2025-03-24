@@ -82,9 +82,9 @@ class Class1 extends Model
             ->using(Approve::class)->withPivot('status', 'created_at', 'updated_at');
     }
 
-    public function report()
+    public function reports()
     {
-        return $this->hasOne(Report::class, 'class_id', 'id');
+        return $this->hasMany(Report::class, 'class_id', 'id');
     }
 
     public function approvals()
