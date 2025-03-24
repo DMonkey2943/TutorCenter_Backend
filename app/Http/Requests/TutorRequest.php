@@ -28,7 +28,7 @@ class TutorRequest extends FormRequest
         if ($this->hasFile('avatar')) {
             $avatarRule = 'nullable|image|max:2048';
         }
-        if ($this->hasFile('avatar')) {
+        if ($this->hasFile('degree')) {
             $degreeRule = 'nullable|image|max:2048';
         }
 
