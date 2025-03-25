@@ -201,6 +201,7 @@ class Class1Controller extends Controller
                 'status' => $data['status'] ?? $class->status,
                 'level_id' => $data['level_id'] ?? $class->level_id,
                 'parent_id' => $data['parent_id'] ?? $class->parent_id,
+                'start_date' => $data['start_date'] ?? $class->start_date,
             ]);
 
             // Cập nhật môn học (subjects)
