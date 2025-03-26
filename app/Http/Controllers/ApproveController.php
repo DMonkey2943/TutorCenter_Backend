@@ -53,8 +53,8 @@ class ApproveController extends Controller
                 return response()->json(
                     [
                         'success' => false,
-                        'message' => 'You have enrolled the class'
-                    ]
+                        'message' => 'Bạn đã đăng ký nhận lớp học này rồi'
+                    ], 404
                 );
             }
         } catch (Exception $e) {
