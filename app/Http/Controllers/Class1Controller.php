@@ -564,4 +564,78 @@ class Class1Controller extends Controller
             ], 400);
         }
     }
+
+    public function recommendClasses(Request $request)
+    {
+        $tutor = Auth::user()->tutor ?? null;
+
+        if (!$tutor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền truy cập chức năng này. Chỉ gia sư mới có thể xem gợi ý lớp học.'
+            ], 403);
+        }
+
+        if (is_null($tutor->profile_status)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thông tin gia sư của bạn. Vui lòng cập nhật hồ sơ gia sư ngay.'
+            ], 404);
+        }
+
+        // Lấy thông tin gia sư cùng các mối quan hệ
+        $tutor->load(['subjects', 'grades', 'districts', 'level']);
+
+        // Lấy danh sách môn học, khối lớp, khu vực mà gia sư có thể dạy
+        $tutorSubjects = $tutor->subjects->pluck('id')->toArray();
+        $tutorGrades = $tutor->grades->pluck('id')->toArray();
+        $tutorDistricts = $tutor->districts->pluck('id')->toArray();
+
+        // Lấy tất cả lớp học chưa có gia sư và các thông tin liên quan
+        $query = Class1::with([
+            'level',
+            'subjects',
+            'grade',
+            'address:id,ward_id',
+            'address.ward:id,name,district_id',
+            'address.ward.district:id,name',
+            'classTimes',
+        ])
+            ->whereNull('tutor_id')     // Chỉ lấy lớp chưa có gia sư
+            ->where('status', 'open');  // Chỉ lấy lớp có trạng thái "open"
+
+        // Lọc lớp học phù hợp
+        $query->where(function ($q) use ($tutor, $tutorSubjects, $tutorGrades, $tutorDistricts) {
+            $q->whereHas('subjects', function ($subQuery) use ($tutorSubjects) {
+                $subQuery->whereIn('subjects.id', $tutorSubjects);
+            })
+                ->whereIn('grade_id', $tutorGrades)
+                ->whereHas('address.ward.district', function ($districtQuery) use ($tutorDistricts) {
+                    $districtQuery->whereIn('districts.id', $tutorDistricts);
+                });
+
+            // Kiểm tra trình độ
+            if ($tutor->level_id) {
+                $q->where(function ($levelQuery) use ($tutor) {
+                    $levelQuery->whereNull('level_id')
+                        ->orWhere('level_id', $tutor->level_id);
+                });
+            }
+
+            // Kiểm tra giới tính
+            $q->where(function ($genderQuery) use ($tutor) {
+                $genderQuery->whereNull('gender_tutor')
+                    ->orWhere('gender_tutor', $tutor->gender);
+            });
+        });
+
+        // Phân trang với 6 mục trên mỗi trang
+        $recommendedClasses = $query->paginate(6);
+
+        // Trả về kết quả
+        return response()->json([
+            'success' => true,
+            'data' => $recommendedClasses
+        ]);
+    }
 }

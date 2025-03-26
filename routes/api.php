@@ -57,6 +57,7 @@ Route::get('classes/getConfirmedClasses', [Class1Controller::class, 'getConfirme
 Route::patch('classes/confirmClassTeaching/{classId}', [Class1Controller::class, 'confirmClassTeaching'])->middleware('auth:sanctum');
 Route::get('classes/getRegisteredClasses', [Class1Controller::class, 'getRegisterdClasses'])->middleware('auth:sanctum');
 Route::patch('classes/completeClass/{classId}', [Class1Controller::class, 'completeClass'])->middleware('auth:sanctum');
+Route::get('classes/recommendClasses', [Class1Controller::class, 'recommendClasses'])->middleware('auth:sanctum');
 Route::resource('classes', Class1Controller::class);
 
 // OTHERS
