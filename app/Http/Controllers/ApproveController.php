@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approve;
+use App\Models\Class1;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Exception;
@@ -13,9 +14,31 @@ class ApproveController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($classId)
     {
-        //
+        $class = Class1::findOrFail($classId);
+
+        if (!$class) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Class not found'
+            ], 404);
+        }
+        try {
+            $approvals = $class->approvals;
+
+            return response()->json([
+                'success' => true,
+                'data' => $approvals,
+                'message' => 'Lấy danh sách gia sư đăng ký lớp thành công'
+            ]);
+        } catch (Exception $e) {
+            Log::error('Unable to get approvals: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi lấy danh sách gia sư đăng ký lớp: ' . $e->getMessage()
+            ], 400);
+        }
     }
 
     /**

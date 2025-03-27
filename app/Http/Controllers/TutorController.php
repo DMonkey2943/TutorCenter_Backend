@@ -46,14 +46,6 @@ class TutorController extends Controller
         );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
     public function createAccount(Request $request)
     {
         $tutor = new Tutor();
@@ -159,14 +151,6 @@ class TutorController extends Controller
                 'message' => 'Tutor\'s profile retrieved successfully'
             ]
         );
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TutorRequest $tutor)
-    {
-        //
     }
 
     /**

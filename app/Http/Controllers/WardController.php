@@ -10,21 +10,9 @@ class WardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($districtId)
     {
-        $wards = Ward::all();
-        return response()->json(
-            [
-                'success' => true,
-                'data' => $wards,
-                'message' => 'Wards retrieved successfully'
-            ]
-        );
-    }
-
-    public function getAllBelongToDistrict($id)
-    {
-        $wards =  Ward::where('district_id', $id)->get();
+        $wards =  Ward::where('district_id', $districtId)->get();
         return response()->json(
             [
                 'success' => true,
@@ -33,6 +21,18 @@ class WardController extends Controller
             ]
         );
     }
+
+    // public function getAllBelongToDistrict($id)
+    // {
+    //     $wards =  Ward::where('district_id', $id)->get();
+    //     return response()->json(
+    //         [
+    //             'success' => true,
+    //             'data' => $wards,
+    //             'message' => 'Wards belong to district retrieved successfully'
+    //         ]
+    //     );
+    // }
 
     /**
      * Show the form for creating a new resource.
