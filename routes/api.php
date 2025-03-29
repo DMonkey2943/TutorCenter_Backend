@@ -79,7 +79,7 @@ use App\Http\Controllers\WardController;
 
 // PUBLIC ROUTES 
 Route::get('/districts', [DistrictController::class, 'index'])->name('districts.index');
-Route::get('/districts/{districtId}/wards', [WardController::class, 'getAllBelongToDistrict']);
+Route::get('/districts/{districtId}/wards', [WardController::class, 'index']);
 Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
 Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
 Route::get('/levels', [LevelController::class, 'index'])->name('levels.index');
@@ -102,26 +102,6 @@ Route::controller(AuthController::class)->group(function () {
 Route::apiResource('users', UserController::class)->middleware('auth:sanctum');
 
 
-// PARENTS ROUTES
-Route::controller(Parent1Controller::class)->group(function () {
-    Route::get('parents/getAll', 'getAll');
-    Route::get('parents/user/{userId}', 'getParentByUserId');
-})->middleware('auth:sanctum');
-Route::apiResource('parents', Parent1Controller::class)->middleware('auth:sanctum');
-
-
-// TUTORS ROUTES
-Route::controller(TutorController::class)->group(function () {
-    // Route::post('tutors/createAccount', 'createAccount');
-    Route::get('tutors/user/{userId}', 'getTutorByUserId');
-    Route::post('tutors/available', 'getAvailableTutors'); // for parents
-    Route::patch('tutors/{id}/approve', 'approveProfile');
-    Route::get('tutors/{id}/rating', 'getAverageRating');
-    Route::match(['patch', 'post'], '{id}', 'update');
-})->middleware('auth:sanctum');
-Route::apiResource('tutors', TutorController::class)->middleware('auth:sanctum');
-
-
 // CLASSES ROUTES
 Route::controller(Class1Controller::class)->group(function () {
     Route::get('classes/latest', 'get12Classes');
@@ -140,6 +120,30 @@ Route::controller(Class1Controller::class)->group(function () {
     });
 });
 Route::apiResource('classes', Class1Controller::class)->middleware('auth:sanctum');
+
+
+// PARENTS ROUTES
+Route::controller(Parent1Controller::class)->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('parents/getAll', 'getAll');
+        Route::get('parents/user/{userId}', 'getParentByUserId');
+    });
+});
+Route::apiResource('parents', Parent1Controller::class)->middleware('auth:sanctum');
+
+
+// TUTORS ROUTES
+Route::controller(TutorController::class)->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        // Route::post('tutors/createAccount', 'createAccount');
+        Route::get('tutors/user/{userId}', 'getTutorByUserId');
+        Route::post('tutors/available', 'getAvailableTutors'); // for parents
+        Route::patch('tutors/{id}/approve', 'approveProfile');
+        Route::get('tutors/{id}/rating', 'getAverageRating');
+        Route::match(['patch', 'post'], '{id}', 'update');
+    });
+});
+Route::apiResource('tutors', TutorController::class)->middleware('auth:sanctum');
 
 
 // APPROVAL ROUTES

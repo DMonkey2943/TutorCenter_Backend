@@ -4,9 +4,21 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class Handler extends ExceptionHandler
 {
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof AuthorizationException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền truy cập tài nguyên này.',
+            ], 403);
+        }
+
+        return parent::render($request, $exception);
+    }
     /**
      * A list of exception types with their corresponding custom log levels.
      *
