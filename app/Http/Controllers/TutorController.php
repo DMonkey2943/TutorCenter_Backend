@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TutorRequest;
+use App\Models\Parent1;
 use App\Models\Tutor;
 use App\Models\TutorDistrict;
 use App\Models\TutorGrade;
@@ -31,6 +32,8 @@ class TutorController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Tutor::class);
+
         $tutors = Tutor::with([
             'user',
             'level',
@@ -128,14 +131,34 @@ class TutorController extends Controller
      */
     public function show($id)
     {
-        $tutor = Tutor::with([
-            'user',
-            'level',
-            'tuition',
-            'districts',
-            'subjects',
-            'grades'
-        ])->find($id);
+        $user = Auth::user();
+        $role = $user->role;
+        $tutor = null;
+        if ($role == 'parent') {
+            $tutor = Tutor::with([
+                'user:id,name',
+                'level',
+                'tuition',
+                'subjects',
+                'grades'
+            ])->findOrFail($id)->makeHidden([
+                'address',
+                'degree',
+                'profile_reason',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ]);
+        } else {
+            $tutor = Tutor::with([
+                'user',
+                'level',
+                'tuition',
+                'districts',
+                'subjects',
+                'grades'
+            ])->findOrFail($id);
+        }
 
         if (!$tutor) {
             return response()->json([
@@ -160,6 +183,8 @@ class TutorController extends Controller
     {
         // dd($request->all(), $request->file('avatar'));
         $profileTutor = Tutor::find($id);
+
+        $this->authorize('update', $profileTutor);
 
         if (!$profileTutor) {
             return response()->json(
@@ -260,6 +285,8 @@ class TutorController extends Controller
     {
         $tutor = Tutor::find($id);
 
+        $this->authorize('delete', $tutor);
+
         if (!$tutor) {
             return response()->json(
                 [
@@ -286,6 +313,18 @@ class TutorController extends Controller
     {
         $tutor = Tutor::where('user_id', $userId)->first();
 
+        $this->authorize('view', $tutor);
+
+        if (Auth::user()->role == 'parent') {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Bạn không có quyền truy cập tài nguyên này.'
+                ],
+                403
+            );
+        }
+
         if (!$tutor) {
             return response()->json(
                 [
@@ -307,8 +346,8 @@ class TutorController extends Controller
 
     public function getAvailableTutors(Request $request)
     {
-        Log::info("getAvailableTutors - request:");
-        Log::info($request);
+        $this->authorize('isParent', Tutor::class);
+
         $validated = $request->validate([
             'district_id' => 'nullable|integer',
             'subjects' => 'nullable|array',
@@ -319,8 +358,8 @@ class TutorController extends Controller
         ]);
 
         try {
-            $query  = Tutor::with([
-                'user',
+            $query = Tutor::with([
+                'user:id,name',
                 'level',
                 'subjects',
                 'grades',
@@ -365,7 +404,14 @@ class TutorController extends Controller
             }
 
             // Get the filtered tutors
-            $tutors = $query->latest('id')->get();
+            $tutors = $query->latest('id')->get()->makeHidden([
+                'address',
+                'degree',
+                'profile_reason',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ]);
 
             return response()->json(
                 [
@@ -385,6 +431,8 @@ class TutorController extends Controller
 
     public function approveProfile(Request $request, $id)
     {
+        $this->authorize('isAdmin', Tutor::class);
+
         $profileTutor = Tutor::find($id);
 
         if (!$profileTutor) {
