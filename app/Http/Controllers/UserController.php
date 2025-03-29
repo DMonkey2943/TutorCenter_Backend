@@ -14,6 +14,8 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', User::class);
+
         $users = User::latest()->get();
         return response()->json(
             [
@@ -50,7 +52,7 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::find($id);
-
+        $this->authorize('view', $user);
         if (!$user) {
             return response()->json([
                 'success' => false,
@@ -74,6 +76,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
+        $this->authorize('update', $user);
         if (!$user) {
             return response()->json(
                 [
@@ -114,6 +117,7 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
+        $this->authorize('delete', $user);
         if (!$user) {
             return response()->json(
                 [
