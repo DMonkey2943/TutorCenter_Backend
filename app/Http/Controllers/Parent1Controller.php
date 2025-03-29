@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Parent1;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Parent1Controller extends Controller
 {
@@ -19,6 +21,8 @@ class Parent1Controller extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Parent1::class);
+
         $parents = Parent1::with('user')->latest('id')->get();
         return response()->json(
             [
@@ -31,6 +35,8 @@ class Parent1Controller extends Controller
 
     public function getAll()
     {
+        $this->authorize('viewAny', Parent1::class);
+
         $parents = Parent1::with('user')->get()->map(function ($parent) {
             return [
                 'value' => $parent->id, // Đổi id thành value
@@ -70,6 +76,7 @@ class Parent1Controller extends Controller
     public function show($id)
     {
         $parent = Parent1::with('user')->find($id);
+        $this->authorize('view', $parent);
 
         if (!$parent) {
             return response()->json([
@@ -93,6 +100,8 @@ class Parent1Controller extends Controller
     public function update(Request $request, $id)
     {
         $parent = Parent1::find($id);
+
+        $this->authorize('update', $parent);
 
         if (!$parent) {
             return response()->json(
@@ -125,6 +134,8 @@ class Parent1Controller extends Controller
     {
         $parent = Parent1::find($id);
 
+        $this->authorize('delete', $parent);
+
         if (!$parent) {
             return response()->json(
                 [
@@ -150,6 +161,8 @@ class Parent1Controller extends Controller
     public function getParentByUserId($userId)
     {
         $parent = Parent1::where('user_id', $userId)->first();
+
+        $this->authorize('view', $parent);
 
         if (!$parent) {
             return response()->json(
