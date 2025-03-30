@@ -34,4 +34,9 @@ class Parent1 extends Model
     {
         return $this->hasMany(Rate::class, 'parent_id', 'id');
     }
+
+    public function isParentOfClass($classId)
+    {
+        return $this->classes()->where('id', $classId)->exists();
+    }
 }

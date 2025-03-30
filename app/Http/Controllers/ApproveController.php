@@ -24,6 +24,10 @@ class ApproveController extends Controller
                 'message' => 'Class not found'
             ], 404);
         }
+
+        $approve = Approve::where('class_id', $classId)->firstOrFail();
+        $this->authorize('viewApprovedTutors', $approve);
+
         try {
             $approvals = $class->approvals;
 
@@ -42,17 +46,27 @@ class ApproveController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'class_id' => 'required',
+        ]);
+
+        $class_id = $validated['class_id'];
+        $class = Class1::find($class_id);
+
+        if (!$class) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Class not found'
+            ], 404);
+        }
+
+        $this->authorize('create', [Approve::class, $class]);
+
         $tutor = Auth::user()->tutor;
-        $class_id = $request->class_id;
 
         try {
             $isEnroll = Approve::where('class_id', $class_id)
@@ -77,7 +91,8 @@ class ApproveController extends Controller
                     [
                         'success' => false,
                         'message' => 'Bạn đã đăng ký nhận lớp học này rồi'
-                    ], 404
+                    ],
+                    404
                 );
             }
         } catch (Exception $e) {
@@ -98,19 +113,15 @@ class ApproveController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Approve $approve)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $classId)
     {
-        $tutor_id = $request->tutor_id;
+        $validated = $request->validate([
+            'tutor_id' => 'required',
+        ]);
+
+        $tutor_id = $validated['tutor_id'];
         $status = $request->status;
 
         $approval = Approve::where('class_id', $classId)
@@ -123,6 +134,8 @@ class ApproveController extends Controller
                 'message' => 'Lỗi xét duyệt gia sư'
             ], 404);
         }
+
+        $this->authorize('update', $approval);
 
         try {
             $approval->update([
@@ -148,35 +161,36 @@ class ApproveController extends Controller
      */
     public function destroy($classId)
     {
-        try {
+        // try {
             $tutor = Auth::user()->tutor;
 
             $approval = Approve::where('class_id', $classId)
-                ->where('tutor_id', $tutor->id);
+                ->where('tutor_id', $tutor->id)
+                ->first();
+
             if (!$approval) {
-                return response()->json(
-                    [
-                        'success' => false,
-                        'message' => 'Tutor or class not found'
-                    ],
-                    404
-                );
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tutor or class not found'
+                ], 404);
             }
 
-            $approval->delete();
-            return response()->json(
-                [
-                    'success' => true,
-                    'message' => 'Unenrolling class successfully'
-                ],
-                204
-            );
-        } catch (Exception $e) {
-            Log::error('Unable to unenroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+            $this->authorize('delete', $approval);
+
+            Approve::where('class_id', $approval->class_id)
+                ->where('tutor_id', $approval->tutor_id)
+                ->delete();
+
             return response()->json([
-                'success' => false,
-                'message' => 'Lỗi hủy đăng ký nhận lớp: ' . $e->getMessage()
-            ], 400);
-        }
+                'success' => true,
+                'message' => 'Unenrolling class successfully'
+            ], 200);
+        // } catch (Exception $e) {
+        //     Log::error('Unable to unenroll class: ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Lỗi hủy đăng ký nhận lớp: ' . $e->getMessage()
+        //     ], 400);
+        // }
     }
 }
