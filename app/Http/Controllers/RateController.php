@@ -21,14 +21,6 @@ class RateController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -48,6 +40,8 @@ class RateController extends Controller
                     'message' => 'Lớp học chưa kết thúc'
                 ], 400);
             }
+
+            $this->authorize('create', [Rate::class, $class]);
 
             $rate = Rate::create([
                 'stars' => $request->stars,
@@ -87,6 +81,9 @@ class RateController extends Controller
                 'message' => 'Class not found'
             ], 404);
         }
+
+        $this->authorize('view', $class);
+
         try {
             $rate = $class->rate;
 
@@ -102,14 +99,6 @@ class RateController extends Controller
                 'message' => 'Lỗi lấy đánh giá gia sư: ' . $e->getMessage()
             ], 400);
         }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rate $rate)
-    {
-        //
     }
 
     /**
