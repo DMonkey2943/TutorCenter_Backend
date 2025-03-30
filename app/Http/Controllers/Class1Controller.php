@@ -24,6 +24,8 @@ class Class1Controller extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Class1::class);
+
         $classes = Class1::with([
             'parent:id,user_id',
             'parent.user:id,name',
@@ -47,6 +49,8 @@ class Class1Controller extends Controller
      */
     public function store(ClassRequest $request)
     {
+        $this->authorize('create', Class1::class);
+
         $data = $request->all();
         $data['status'] = 0;
 
@@ -132,6 +136,8 @@ class Class1Controller extends Controller
             // 'approvals:tutor_id,class_id,status'
         ])->find($id);
 
+        $this->authorize('view', $class);
+
         if (!$class) {
             return response()->json([
                 'success' => false,
@@ -154,6 +160,8 @@ class Class1Controller extends Controller
     public function update(ClassRequest $request, $id)
     {
         $class = Class1::find($id);
+
+        $this->authorize('update', $class);
 
         if (!$class) {
             return response()->json([
@@ -234,6 +242,8 @@ class Class1Controller extends Controller
     {
         $class = Class1::find($id);
 
+        $this->authorize('delete', $class);
+
         if (!$class) {
             return response()->json(
                 [
@@ -269,7 +279,13 @@ class Class1Controller extends Controller
             ->where('status', 0)
             ->latest()
             ->take(12) // Lấy 12 bản ghi
-            ->get();
+            ->get()->makeHidden([
+                'parent_id',
+                'end_date',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ]);
         return response()->json(
             [
                 'success' => true,
@@ -279,7 +295,7 @@ class Class1Controller extends Controller
         );
     }
 
-    public function getAllNewClasses()
+    public function getAllNewClasses(Request $request)
     {
         $query = Class1::with([
             'level',
@@ -301,21 +317,34 @@ class Class1Controller extends Controller
         //     }]);
         // }
 
-        $classes = $query->latest()->paginate(6);
+        $classes = $query->latest()->paginate(12);
+
+        // Áp dụng makeHidden cho từng model trong collection
+        $classes->getCollection()->transform(function ($class) {
+            return $class->makeHidden([
+                'parent_id',
+                'end_date',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ]);
+        });
 
         return response()->json($classes);
     }
 
-    public function getEnrolledClasses() //for tutors
+    public function getEnrolledClasses(Request $request) //for tutors
     {
+        $this->authorize('isTutor', Class1::class);
+
         $tutor = Auth::user()->tutor;
 
-        if (!$tutor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gia sư không hợp lệ'
-            ], 400);
-        }
+        // if (!$tutor) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Gia sư không hợp lệ'
+        //     ], 400);
+        // }
 
         try {
             $classes = Class1::whereHas('approvals', function ($query) use ($tutor) {
@@ -331,7 +360,17 @@ class Class1Controller extends Controller
                 'approvals' => function ($query) use ($tutor) {
                     $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
                 }
-            ])->latest()->paginate(6);
+            ])->latest()->paginate(12);
+
+            $classes->getCollection()->transform(function ($class) {
+                return $class->makeHidden([
+                    'parent_id',
+                    'end_date',
+                    'created_at',
+                    'updated_at',
+                    'deleted_at',
+                ]);
+            });
 
             return response()->json($classes);
         } catch (Exception $e) {
@@ -345,14 +384,16 @@ class Class1Controller extends Controller
 
     public function getConfirmedClasses() //for tutors
     {
+        $this->authorize('isTutor', Class1::class);
+
         $tutor = Auth::user()->tutor;
 
-        if (!$tutor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gia sư không hợp lệ'
-            ], 400);
-        }
+        // if (!$tutor) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Gia sư không hợp lệ'
+        //     ], 400);
+        // }
 
         try {
             $classes = Class1::whereHas('approvals', function ($query) use ($tutor) {
@@ -384,24 +425,24 @@ class Class1Controller extends Controller
     public function confirmClassTeaching($classId)
     { //for tutors
         $tutor = Auth::user()->tutor;
-        if (!$tutor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bạn không phải là gia sư!'
-            ], 403);
-        }
+        // if (!$tutor) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Bạn không phải là gia sư!'
+        //     ], 403);
+        // }
 
         // Kiểm tra xem gia sư đã được duyệt chưa
-        $approved = Approve::where('class_id', $classId)
-            ->where('tutor_id', $tutor->id)
-            ->whereIn('status', [1, 2])
-            ->exists();
-        if (!$approved) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bạn chưa được duyệt để dạy lớp này!'
-            ], 403);
-        }
+        // $approved = Approve::where('class_id', $classId)
+        //     ->where('tutor_id', $tutor->id)
+        //     ->whereIn('status', [1, 2])
+        //     ->exists();
+        // if (!$approved) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Bạn chưa được duyệt để dạy lớp này!'
+        //     ], 403);
+        // }
 
         // Tìm lớp học
         $class = Class1::with([
@@ -418,13 +459,15 @@ class Class1Controller extends Controller
             ], 404);
         }
 
+        $this->authorize('confirmTeaching', $class);
+
         // Kiểm tra xem lớp đã có gia sư nhận dạy chưa
-        if ($class->status == 1) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lớp học này đã có gia sư nhận dạy!'
-            ], 400);
-        }
+        // if ($class->status == 1) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Lớp học này đã có gia sư nhận dạy!'
+        //     ], 400);
+        // }
 
         try {
             $class->update([
@@ -481,14 +524,16 @@ class Class1Controller extends Controller
 
     public function getRegisterdClasses() //for parents
     {
+        $this->authorize('isParent', Class1::class);
+
         $parent = Auth::user()->parent;
 
-        if (!$parent) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Phụ huynh không hợp lệ'
-            ], 400);
-        }
+        // if (!$parent) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Phụ huynh không hợp lệ'
+        //     ], 400);
+        // }
 
         try {
             $classes = Class1::where('parent_id', $parent->id)->with([
@@ -521,6 +566,8 @@ class Class1Controller extends Controller
                 'message' => 'Class not found'
             ], 404);
         }
+
+        $this->authorize('update', $class);
 
         if ($class->status != 1) {
             return response()->json([
