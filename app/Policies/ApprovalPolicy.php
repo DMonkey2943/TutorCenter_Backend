@@ -72,9 +72,9 @@ class ApprovalPolicy
      */
     public function delete(User $user, Approve $approve): bool
     {
-        Log::info('delete() - $user->role: ' . $user->role);
-        Log::info('delete() - $user->tutor->id: ' . $user->tutor->id);
-        Log::info('delete() - $approve: ' . $approve);
+        // Log::info('delete() - $user->role: ' . $user->role);
+        // Log::info('delete() - $user->tutor->id: ' . $user->tutor->id);
+        // Log::info('delete() - $approve: ' . $approve);
         return $user->role === 'tutor'
             && $user->tutor->id === $approve->tutor_id 
             && $approve->status === 0;
@@ -83,16 +83,16 @@ class ApprovalPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Approve $approve): bool
-    {
-        //
-    }
+    // public function restore(User $user, Approve $approve): bool
+    // {
+    //     //
+    // }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Approve $approve): bool
-    {
-        //
-    }
+    // public function forceDelete(User $user, Approve $approve): bool
+    // {
+    //     //
+    // }
 }

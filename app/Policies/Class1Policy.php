@@ -31,10 +31,10 @@ class Class1Policy
      */
     public function view(User $user, Class1 $class1): bool
     {
-        Log::info('Class1Policy view() - $user->parent?->id: ' . $user->parent?->id);
-        Log::info('Class1Policy view() - $class1?->parent_id: ' . $class1?->parent_id);
-        Log::info('Class1Policy view() - $user->tutor?->id: ' . $user->tutor?->id);
-        Log::info('Class1Policy view() - $class1?->tutor_id: ' . $class1?->tutor_id);
+        // Log::info('Class1Policy view() - $user->parent?->id: ' . $user->parent?->id);
+        // Log::info('Class1Policy view() - $class1?->parent_id: ' . $class1?->parent_id);
+        // Log::info('Class1Policy view() - $user->tutor?->id: ' . $user->tutor?->id);
+        // Log::info('Class1Policy view() - $class1?->tutor_id: ' . $class1?->tutor_id);
 
         return ($user->parent?->id === $class1?->parent_id)
             || ($user->tutor?->id !== null && $class1?->tutor_id !== null && $user->tutor?->id === $class1?->tutor_id);
