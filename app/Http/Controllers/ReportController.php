@@ -18,6 +18,8 @@ class ReportController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Report::class);
+
         $reports = Report::with([
             'class:id',
             'tutor:id,user_id',
@@ -45,6 +47,9 @@ class ReportController extends Controller
 
         try {
             $class = Class1::findOrFail($request->class_id);
+
+            $this->authorize('create', [Report::class, $class]);
+
             $today = Carbon::now();
             $startDate = Carbon::parse($class->start_date);
             if ($today->lessThan($startDate) && $class->status == 1) {
@@ -98,6 +103,8 @@ class ReportController extends Controller
             ], 404);
         }
 
+        $this->authorize('view', $report);
+
         return response()->json(
             [
                 'success' => true,
@@ -123,6 +130,8 @@ class ReportController extends Controller
                 404
             );
         }
+
+        $this->authorize('update', $report);
 
         $request->validate([
             'response' => 'required|string',
@@ -162,9 +171,14 @@ class ReportController extends Controller
         if (!$class) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tutor không tồn tại'
+                'message' => 'Lớp học không tồn tại'
             ], 404);
         }
+
+        // $this->authorize('isTutorTeachingClass', $class);
+
+
+        $this->authorize('isTutorTeachingClass', [Report::class, $class]);
 
         try {
             $reports = $class->reports()->get();
