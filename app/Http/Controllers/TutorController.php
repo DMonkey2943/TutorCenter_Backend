@@ -30,16 +30,24 @@ class TutorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Tutor::class);
 
-        $tutors = Tutor::with([
+        $query = Tutor::with([
             'user',
             'level',
             'subjects',
             'grades'
-        ])->latest('id')->get();
+        ]);
+
+        // Kiểm tra nếu có tham số status trong request
+        if ($request->has('profile_status')) {
+            $profile_status = $request->query('profile_status');
+            $query->where('profile_status', $profile_status);
+        }
+
+        $tutors = $query->latest('id')->get();
         return response()->json(
             [
                 'success' => true,
