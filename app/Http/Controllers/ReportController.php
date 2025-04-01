@@ -16,15 +16,24 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Report::class);
 
-        $reports = Report::with([
+        $query = Report::with([
             'class:id',
             'tutor:id,user_id',
             'tutor.user:id,name',
-        ])->latest('id')->get();
+        ]);
+
+        // Kiểm tra nếu có tham số status trong request
+        if ($request->has('status')) {
+            $status = $request->query('status');
+            $query->where('status', $status);
+        }
+
+        $reports = $query->latest('id')->get();
+
         return response()->json(
             [
                 'success' => true,
