@@ -22,11 +22,11 @@ class Class1Controller extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Class1::class);
 
-        $classes = Class1::with([
+        $query = Class1::with([
             'parent:id,user_id',
             'parent.user:id,name',
             'level',
@@ -34,7 +34,16 @@ class Class1Controller extends Controller
             'grade',
             'address',
             'tutor',
-        ])->latest('id')->get();
+        ]);
+
+        // Kiểm tra nếu có tham số status trong request
+        if ($request->has('status')) {
+            $status = $request->query('status');
+            $query->where('status', $status);
+        }
+
+        // Lấy kết quả và sắp xếp theo id mới nhất
+        $classes = $query->latest('id')->get();
         return response()->json(
             [
                 'success' => true,
