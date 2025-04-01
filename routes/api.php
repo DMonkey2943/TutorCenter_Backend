@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Parent1Controller;
 use App\Http\Controllers\TutorController;
@@ -28,54 +29,6 @@ use App\Http\Controllers\WardController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-// Route::apiResource('users', UserController::class);
-
-// //PARENTS
-// Route::get('parents/getAll', [Parent1Controller::class, 'getAll']);
-// Route::get('parents/user/{userId}', [Parent1Controller::class, 'getParentByUserId']);
-// Route::apiResource('parents', Parent1Controller::class);
-
-// // TUTORS
-// Route::post('tutors/createAccount', [TutorController::class, 'createAccount']);
-// Route::get('tutors/user/{userId}', [TutorController::class, 'getTutorByUserId']);
-// Route::post('tutors/available', [TutorController::class, 'getAvailableTutors']);
-// Route::patch('tutors/{id}/approve', [TutorController::class, 'approveProfile']);
-// Route::get('/tutors/{id}/averageRating', [TutorController::class, 'getAverageRating']);
-// Route::match(['patch', 'post'], '/tutors/{id}', [TutorController::class, 'update']);
-// Route::apiResource('tutors', TutorController::class);
-
-// // CLASSES
-// Route::get('classes/get12Classes', [Class1Controller::class, 'get12Classes']);
-// Route::get('classes/getAllNewClasses', [Class1Controller::class, 'getAllNewClasses']);
-// Route::get('classes/getEnrolledClasses', [Class1Controller::class, 'getEnrolledClasses'])->middleware('auth:sanctum');
-// Route::get('classes/getConfirmedClasses', [Class1Controller::class, 'getConfirmedClasses'])->middleware('auth:sanctum');
-// Route::patch('classes/confirmClassTeaching/{classId}', [Class1Controller::class, 'confirmClassTeaching'])->middleware('auth:sanctum');
-// Route::get('classes/getRegisteredClasses', [Class1Controller::class, 'getRegisterdClasses'])->middleware('auth:sanctum');
-// Route::patch('classes/completeClass/{classId}', [Class1Controller::class, 'completeClass'])->middleware('auth:sanctum');
-// Route::get('classes/recommendClasses', [Class1Controller::class, 'recommendClasses'])->middleware('auth:sanctum');
-// Route::apiResource('classes', Class1Controller::class);
-
-
-
-// // RATES
-// Route::get('/rates/{classId}', [RateController::class, 'show']);
-// Route::post('/rates', [RateController::class, 'store']);
-
-// // APPROVE
-// Route::controller(ApproveController::class)->group(function () {
-//     Route::post('approval/enroll', 'store')->middleware('auth:sanctum');
-//     Route::delete('approval/unenroll/{classId}', 'destroy')->middleware('auth:sanctum');
-//     Route::patch('approval/{classId}', 'update')->middleware('auth:sanctum');
-// });
-
-// // RATES
-// Route::get('/reports', [ReportController::class, 'index']);
-// Route::get('/reports/{id}', [ReportController::class, 'show']);
-// Route::post('/reports', [ReportController::class, 'store']);
-// Route::patch('/reports/{id}', [ReportController::class, 'update']);
-// Route::get('/reports/classes/{classId}', [ReportController::class, 'getTutorReportsForClass']);
-
 
 // PUBLIC ROUTES 
 Route::get('/districts', [DistrictController::class, 'index'])->name('districts.index');
@@ -171,3 +124,9 @@ Route::controller(ReportController::class)->middleware('auth:sanctum')->group(fu
     Route::get('/reports/classes/{classId}', 'getTutorReportsForClass');
 });
 Route::apiResource('reports', ReportController::class)->middleware('auth:sanctum');
+
+
+//DASHBOARD ADMIN
+Route::controller(AdminDashboardController::class)->middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('/dashboard/stats', 'getStats');
+});
