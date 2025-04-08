@@ -7,6 +7,7 @@ use App\Models\Class1;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class ApprovalPolicy
 {
@@ -53,9 +54,32 @@ class ApprovalPolicy
         // Log::info('create() - $user->role: ' . $user->role);
         // Log::info('create() - $user->tutor->profile_status: ' . $user->tutor->profile_status);
         // Log::info('create() - $class->status: ' . $class->status);
-        return $class->status === 0 //Lớp chưa giao
-            && $user->role === 'tutor'
-            && $user->tutor->profile_status === 1; //Hồ sơ gia sư được duyệt
+
+        // Kiểm tra điều kiện cơ bản
+        if ($class->status !== 0) {
+            throw new AuthorizationException('Lớp học này đã được giao, không thể đăng ký.');
+        }
+
+        if ($user->role !== 'tutor') {
+            throw new AuthorizationException('Chỉ có gia sư mới được phép đăng ký nhận lớp.');
+        }
+
+        if ($user->tutor->profile_status === null) {
+            throw new AuthorizationException('Hãy cập nhật hồ sơ của bạn để có thể đăng ký nhận lớp nhé!');
+        }
+
+        if ($user->tutor->profile_status === -1) {
+            throw new AuthorizationException('Hồ sơ của bạn bị từ chối. Hãy cập nhật lại chính xác hồ sơ của bạn để có thể đăng ký nhận lớp nhé!');
+        }
+
+        if ($user->tutor->profile_status === 0) {
+            throw new AuthorizationException('Hồ sơ của bạn đang chờ được duyệt. Vui lòng đợi trung tâm xét duyệt hồ sơ để có thể đăng ký nhận lớp nhé!');
+        }
+
+        return $user->tutor->profile_status === 1;
+
+        // Trả về true nếu profile_status = 1 (hồ sơ đã được duyệt)
+        return $user->tutor->profile_status === 1;
     }
 
     /**
@@ -76,7 +100,7 @@ class ApprovalPolicy
         // Log::info('delete() - $user->tutor->id: ' . $user->tutor->id);
         // Log::info('delete() - $approve: ' . $approve);
         return $user->role === 'tutor'
-            && $user->tutor->id === $approve->tutor_id 
+            && $user->tutor->id === $approve->tutor_id
             && $approve->status === 0;
     }
 

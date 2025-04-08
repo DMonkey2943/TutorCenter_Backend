@@ -11,6 +11,26 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         if ($exception instanceof AuthorizationException) {
+            $message = $exception->getMessage();
+
+            // Danh sách các thông báo từ create() trong ApprovalPolicy
+            $customMessages = [
+                'Lớp học này đã được giao, không thể đăng ký.',
+                'Chỉ có gia sư mới được phép đăng ký nhận lớp.',
+                'Hãy cập nhật hồ sơ của bạn để có thể đăng ký nhận lớp nhé!',
+                'Hồ sơ của bạn bị từ chối. Hãy cập nhật lại chính xác hồ sơ của bạn để có thể đăng ký nhận lớp nhé!',
+                'Hồ sơ của bạn đang chờ được duyệt. Vui lòng đợi trung tâm xét duyệt hồ sơ để có thể đăng ký nhận lớp nhé!',
+            ];
+
+            // Nếu thông báo nằm trong danh sách từ create(), trả về nó
+            if (in_array($message, $customMessages)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 403);
+            }
+
+            // Các trường hợp AuthorizationException khác trả về thông báo mặc định
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền truy cập tài nguyên này.',
