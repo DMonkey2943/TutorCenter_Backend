@@ -348,17 +348,17 @@ class Class1Controller extends Controller
 
         $tutor = Auth::user()->tutor;
 
-        // if (!$tutor) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Gia sư không hợp lệ'
-        //     ], 400);
-        // }
-
         try {
-            $classes = Class1::whereHas('approvals', function ($query) use ($tutor) {
+            $query = Class1::whereHas('approvals', function ($query) use ($tutor) {
                 $query->where('tutor_id', $tutor->id);
-            })->with([
+            });
+
+            if ($request->has('status')) {
+                $status = $request->input('status');
+                $query->where('status', $status);
+            }
+
+            $classes = $query->with([
                 'level',
                 'subjects',
                 'grade',
@@ -366,8 +366,8 @@ class Class1Controller extends Controller
                 'address.ward:id,name,district_id',
                 'address.ward.district:id,name',
                 'classTimes',
-                'approvals' => function ($query) use ($tutor) {
-                    $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
+                'approvals' => function ($query1) use ($tutor) {
+                    $query1->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
                 }
             ])->latest()->paginate(12);
 
@@ -419,7 +419,7 @@ class Class1Controller extends Controller
                 'approvals' => function ($query) use ($tutor) {
                     $query->where('tutor_id', $tutor->id)->select('tutor_id', 'class_id', 'status');
                 }
-            ])->latest()->paginate(6);
+            ])->latest()->paginate(12);
 
             return response()->json($classes);
         } catch (Exception $e) {
@@ -531,29 +531,49 @@ class Class1Controller extends Controller
         }
     }
 
-    public function getRegisterdClasses() //for parents
+    public function getRegisterdClasses(Request $request) //for parents
     {
         $this->authorize('isParent', Class1::class);
 
         $parent = Auth::user()->parent;
 
-        // if (!$parent) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Phụ huynh không hợp lệ'
-        //     ], 400);
-        // }
-
         try {
-            $classes = Class1::where('parent_id', $parent->id)->with([
+            $query = Class1::where('parent_id', $parent->id);
+
+            // Check if status parameter exists in request and filter accordingly
+            if ($request->has('status')) {
+                $status = $request->input('status');
+                $query->where('status', $status);
+            }
+
+            $classes = $query->with([
                 'tutor:id,user_id',
                 'tutor.user:id,name,phone',
                 'level',
                 'address.ward.district',
                 'subjects',
                 'grade',
-                'classTimes'
-            ])->latest()->paginate(6);
+                'classTimes',
+                'approvals' => function ($query) {
+                    $query->where('status', 0);
+                }
+            ])
+                ->withCount([
+                    'approvals as pending_approvals_count' => function ($query) {
+                        $query->where('status', 0);
+                    }
+                ])
+                ->latest()
+                ->paginate(12);
+
+            // Transform the results to include pending_approvals_count only when status = 0
+            $classes->getCollection()->transform(function ($class) {
+                if ($class->status !== 0) {
+                    unset($class->pending_approvals_count);
+                    unset($class->approvals);
+                }
+                return $class;
+            });
 
             return response()->json($classes);
         } catch (Exception $e) {
@@ -670,7 +690,7 @@ class Class1Controller extends Controller
         });
 
         // Phân trang với 6 mục trên mỗi trang
-        $recommendedClasses = $query->paginate(6);
+        $recommendedClasses = $query->paginate(12);
 
         // Trả về kết quả
         return response()->json([
