@@ -93,7 +93,7 @@ Route::controller(TutorController::class)->group(function () {
         Route::post('tutors/available', 'getAvailableTutors'); // for parents
         Route::patch('tutors/{id}/approve', 'approveProfile');
         Route::get('tutors/{id}/rating', 'getAverageRating');
-        Route::match(['patch', 'post'], '{id}', 'update');
+        Route::match(['patch', 'post'], 'tutors/{id}', 'update');
     });
 });
 Route::apiResource('tutors', TutorController::class)->middleware('auth:sanctum');
@@ -117,10 +117,6 @@ Route::controller(RateController::class)->middleware('auth:sanctum')->group(func
 
 // REPORTS ROUTES
 Route::controller(ReportController::class)->middleware('auth:sanctum')->group(function () {
-    // Route::get('/reports', 'index');
-    // Route::get('/reports/{id}', 'show');
-    // Route::post('/reports', 'store');
-    // Route::patch('/reports/{id}', 'update');
     Route::get('/reports/classes/{classId}', 'getTutorReportsForClass');
 });
 Route::apiResource('reports', ReportController::class)->middleware('auth:sanctum');
